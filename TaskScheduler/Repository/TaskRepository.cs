@@ -1,16 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using TaskSchedulerLibrary.Models;
+using TaskSchedulerLibrary.Services;
 
 namespace TaskSchedulerLibrary.Repository
 {
     public class TaskRepository : IRepository<TaskItem>
     {
+        private readonly NotificationService _notificationService;
+
         private readonly List<TaskItem> tasks = new List<TaskItem>();
 
         public delegate void TaskStatusChangedDelegate(TaskItem task);
         public event TaskStatusChangedDelegate TaskStatusChanged;
+
+
+        public TaskRepository(NotificationService notificationService)
+        {
+            _notificationService = notificationService;
+        }
 
         protected virtual void OnTaskStatusChanged(TaskItem task)
         {
@@ -30,6 +40,7 @@ namespace TaskSchedulerLibrary.Repository
         public void Add(TaskItem entity)
         {
             tasks.Add(entity);
+            _notificationService.SendEmailNotificationAsync(entity);
         }
 
         public void Update(TaskItem entity)

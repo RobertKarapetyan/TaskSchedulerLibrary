@@ -3,6 +3,8 @@ using System;
 using System.Linq;
 using TaskSchedulerLibrary.Models;
 using TaskSchedulerLibrary.Repository;
+using TaskSchedulerLibrary.Services;
+using Moq;
 
 namespace TaskSchedulerLibrary.Tests.RepositoryTests
 {
@@ -10,11 +12,13 @@ namespace TaskSchedulerLibrary.Tests.RepositoryTests
     public class TaskRepositoryTests
     {
         private TaskRepository _taskRepository;
+        private Mock<NotificationService> _mockNotificationService;
 
         [TestInitialize]
         public void SetUp()
         {
-            _taskRepository = new TaskRepository();
+            _mockNotificationService = new Mock<NotificationService>();
+            _taskRepository = new TaskRepository(_mockNotificationService.Object);
         }
 
         [TestMethod]
@@ -79,6 +83,18 @@ namespace TaskSchedulerLibrary.Tests.RepositoryTests
             _taskRepository.Update(task);
 
             Assert.IsFalse(eventWasFired);
+        }
+
+        [TestMethod]
+        public void AddTask_SendsNotification()
+        {
+            var task = new TaskItem { Name = "Sample Task", DueDate = DateTime.Now.AddDays(5) };
+
+            _mockNotificationService.Setup(service => service.SendEmailNotificationAsync(It.IsAny<TaskItem>()));
+
+            _taskRepository.Add(task);
+
+            _mockNotificationService.Verify(service => service.SendEmailNotificationAsync(task), Times.Once);
         }
     }
 }

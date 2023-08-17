@@ -11,9 +11,9 @@ namespace TaskSchedulerLibrary.Services
     {
         private readonly ConcurrentBag<NotificationLog> _notificationLogs = new ConcurrentBag<NotificationLog>();
 
-        public async Task SendEmailNotificationAsync(TaskItem task)
+        public virtual async Task SendEmailNotificationAsync(TaskItem task)
         {
-            await Task.Delay(TimeSpan.FromSeconds(2));  // Simulate delay
+            await Task.Delay(TimeSpan.FromSeconds(2));  
 
             _notificationLogs.Add(new NotificationLog
             {
