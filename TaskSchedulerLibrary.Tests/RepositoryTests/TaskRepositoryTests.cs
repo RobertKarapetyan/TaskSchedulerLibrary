@@ -53,5 +53,32 @@ namespace TaskSchedulerLibrary.Tests.RepositoryTests
             var deletedTask = _taskRepository.GetById(task.Id);
             Assert.IsNull(deletedTask);
         }
+
+        [TestMethod]
+        public void Update_ExistingTask_TaskStatusChangedEventFired()
+        {
+            var task = new TaskItem { Id = Guid.NewGuid(), Name = "Test Task", DueDate = DateTime.Now, IsCompleted = false };
+            _taskRepository.Add(task);
+            bool eventWasFired = false;
+            _taskRepository.TaskStatusChanged += (changedTask) => eventWasFired = true;
+
+            task.Name = "Updated Task";
+            _taskRepository.Update(task);
+
+            Assert.IsTrue(eventWasFired);
+        }
+
+        [TestMethod]
+        public void Update_NonExistingTask_TaskStatusChangedEventNotFired()
+        {
+            var task = new TaskItem { Id = Guid.NewGuid(), Name = "Test Task", DueDate = DateTime.Now, IsCompleted = false };
+            bool eventWasFired = false;
+            _taskRepository.TaskStatusChanged += (changedTask) => eventWasFired = true;
+
+            task.Name = "Updated Task";
+            _taskRepository.Update(task);
+
+            Assert.IsFalse(eventWasFired);
+        }
     }
 }
